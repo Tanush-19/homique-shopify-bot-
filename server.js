@@ -1,20 +1,33 @@
+require("dotenv").config();
+
 const express = require("express");
+const orderCreate = require("./webhook/orderCreate");
 
 const app = express();
 
+// Parse Shopify JSON webhooks
 app.use(express.json());
 
+// Home route
 app.get("/", (req, res) => {
     res.send("✅ Shopify Webhook Server Running");
 });
 
-app.post("/webhook/orders", (req, res) => {
-    console.log("📦 New Order Received!");
-    console.log(req.body);
+// Shopify Order Creation Webhook
+app.post("/webhook/orders", async (req, res) => {
+    try {
+        console.log("📦 New Order Received!");
 
-    res.sendStatus(200);
+        await orderCreate(req.body);
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.error("❌ Webhook Error:", error);
+        res.sendStatus(500);
+    }
 });
 
+// Start Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
