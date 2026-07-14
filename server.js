@@ -5,29 +5,25 @@ const orderCreate = require("./webhook/orderCreate");
 
 const app = express();
 
-// Parse Shopify JSON webhooks
 app.use(express.json());
 
-// Home route
 app.get("/", (req, res) => {
     res.send("✅ Shopify Webhook Server Running");
 });
 
-// Shopify Order Creation Webhook
 app.post("/webhook/orders", async (req, res) => {
+    console.log("📦 Shopify webhook received");
+
     try {
-        console.log("📦 New Order Received!");
-
         await orderCreate(req.body);
-
-        res.sendStatus(200);
-    } catch (error) {
-        console.error("❌ Webhook Error:", error);
-        res.sendStatus(500);
+        console.log("✅ orderCreate() completed");
+    } catch (err) {
+        console.error("❌ Webhook Error:", err);
     }
+
+    res.sendStatus(200);
 });
 
-// Start Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
